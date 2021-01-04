@@ -10,9 +10,9 @@ import UIKit
 class TopTextFieldDelegate: NSObject, UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         
-        MemeMeViewController.activeTextField = textField
+        MemeViewController.activeTextField = textField
         
-        if(textField.text == MemeMeViewController.topPlaceholderText){
+        if(textField.text == MemeViewController.topPlaceholderText){
             textField.text = ""
         }
     }
@@ -30,14 +30,14 @@ class TopTextFieldDelegate: NSObject, UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if(textField.text == ""){
-            textField.text = MemeMeViewController.topPlaceholderText
+            textField.text = MemeViewController.topPlaceholderText
         }
     }
     
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        MemeMeViewController.activeTextField = nil
+        MemeViewController.activeTextField = nil
         return true
     }
 }

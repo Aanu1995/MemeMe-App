@@ -1,15 +1,15 @@
 //
-//  MemeMeViewController.swift
-//  MemeMe
+//  MemeViewController.swift
+//  Meme
 //
 //  Created by user on 02/01/2021.
 //
 
 import UIKit
 
-class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
-    // Make: IBOutlets
+    // MARK: IBOutlets
 
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var topTextField: UITextField!
@@ -21,22 +21,22 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
     @IBOutlet weak var bottomToolBar: UIToolbar!
     @IBOutlet weak var topToolBar: UIToolbar!
     
-    // TextField Delegates
+    // MARK: TextField Delegates
     let topTextFieldDelegate = TopTextFieldDelegate()
     let bottomTextFieldDelegate = BottomTextFieldDelegate()
     
-    // static properties
+    // MARK: Static Properties
     static let topPlaceholderText:String = "TOP"
     static let bottomPlaceholderText: String = "BOTTOM"
     static var activeTextField: UITextField!
     
-    // properties
-    var isKeyboardShown = false
+    // MARK: Properties
+    var isKeyboardShown = false // implemented due to notification bug in IOS simulator
     let memeTextAttributes: [NSAttributedString.Key: Any] = [
        .foregroundColor: UIColor.black,
        .strokeColor: UIColor.white,
        .font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-       .strokeWidth:  3.0
+        .strokeWidth: 4.0
     ]
     
     
@@ -53,12 +53,13 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         
         // set all attributes of text in both top and bottom textfield
         bottomTextField.delegate = bottomTextFieldDelegate
-        bottomTextField.text = MemeMeViewController.bottomPlaceholderText
+        bottomTextField.text = MemeViewController.bottomPlaceholderText
         bottomTextField.defaultTextAttributes = memeTextAttributes
+        
         bottomTextField.textAlignment = .center
         
         topTextField.delegate = topTextFieldDelegate
-        topTextField.text = MemeMeViewController.topPlaceholderText
+        topTextField.text = MemeViewController.topPlaceholderText
         topTextField.defaultTextAttributes = memeTextAttributes
         topTextField.textAlignment = .center
         
@@ -91,17 +92,20 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
     @objc func keyboardWillShow(_ notification: Notification){
         if(notification.name == UIResponder.keyboardWillShowNotification && !isKeyboardShown){
             let keyBoardHeight = getKeyboardHeight(notification)
-            let realActiveTextFieldFrame = MemeMeViewController.activeTextField.convert(MemeMeViewController.activeTextField.frame, to: self.view)
-            let textFieldHeightDiff = realActiveTextFieldFrame.origin.y + realActiveTextFieldFrame.height
-            let keyboardHeightDiff = self.view.frame.height - keyBoardHeight
-           
-            let viewMoveDiff = keyboardHeightDiff - textFieldHeightDiff
             
-            if viewMoveDiff < 0 {
-                isKeyboardShown = true
-                view.frame.origin.y -= keyBoardHeight
+            if let activeField = MemeViewController.activeTextField {
+                let realActiveTextFieldFrame = activeField.convert(activeField.frame, to: self.view)
+                
+                let textFieldHeightDiff = realActiveTextFieldFrame.origin.y - realActiveTextFieldFrame.height
+                let keyboardHeightDiff = self.view.frame.height - keyBoardHeight
+               
+                let viewMoveDiff = keyboardHeightDiff - textFieldHeightDiff
+                
+                if viewMoveDiff < 0 {
+                    isKeyboardShown = true
+                    view.frame.origin.y -= keyBoardHeight
+                }
             }
-           
         }
     }
     
@@ -116,7 +120,7 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
     // Tells the delegate what the user picked.
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
-        if let image = info[.editedImage] as? UIImage{
+        if let image = info[.originalImage] as? UIImage{
             imageView.image = image
             // enabled the share button
             shareBarButton.isEnabled = true;
@@ -151,14 +155,13 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
     }
     
     
-    // Make: IBActions
+    // MARK: IBActions
 
     @IBAction func pickImageFromAlbum(_ sender: Any) {
         let controller = UIImagePickerController()
         
         controller.delegate = self
         controller.sourceType = .photoLibrary
-        controller.allowsEditing = true
         
         present(controller, animated: true, completion: nil)
     }
@@ -168,7 +171,6 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         
         controller.delegate = self
         controller.sourceType = .camera
-        controller.allowsEditing = true
         
         present(controller, animated: true, completion: nil)
     }
@@ -190,10 +192,13 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         
         self.present(controller, animated: true, completion: nil)
         
+        // for ipad
         if let popOver = controller.popoverPresentationController {
           popOver.sourceView = self.view
-         
         }
+       
+        
+        
         
         
     }
@@ -201,19 +206,13 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
     // return app to launch state
     @IBAction func cancel(_ sender: Any) {
         imageView.image = nil
-        topTextField.text = MemeMeViewController.topPlaceholderText
-        bottomTextField.text = MemeMeViewController.bottomPlaceholderText
+        topTextField.text = MemeViewController.topPlaceholderText
+        bottomTextField.text = MemeViewController.bottomPlaceholderText
         shareBarButton.isEnabled = false
     }
 }
 
 
-struct Meme{
-    let topText: String
-    let bottomText: String
-    let originalImage: UIImage
-    let memedImage: UIImage
-}
 
 
 

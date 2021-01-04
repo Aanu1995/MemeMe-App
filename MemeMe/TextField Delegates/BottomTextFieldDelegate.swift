@@ -11,9 +11,9 @@ class BottomTextFieldDelegate: NSObject, UITextFieldDelegate {
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
         
-        MemeMeViewController.activeTextField = textField
+        MemeViewController.activeTextField = textField
         
-        if(textField.text == MemeMeViewController.bottomPlaceholderText){
+        if(textField.text == MemeViewController.bottomPlaceholderText){
             textField.text = ""
         }
     }
@@ -32,14 +32,14 @@ class BottomTextFieldDelegate: NSObject, UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if(textField.text == ""){
-            textField.text = MemeMeViewController.bottomPlaceholderText
+            textField.text = MemeViewController.bottomPlaceholderText
         }
     }
     
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        MemeMeViewController.activeTextField = nil
+        MemeViewController.activeTextField = nil
         return true
     }
 }
