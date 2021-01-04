@@ -16,6 +16,7 @@
 		CE1B285025A0019800572FED /* TopTextFieldDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1B284F25A0019800572FED /* TopTextFieldDelegate.swift */; };
 		CE1B285325A001F600572FED /* BottomTextFieldDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1B285225A001F600572FED /* BottomTextFieldDelegate.swift */; };
 		CE45330E25A23F190020F91E /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE45330D25A23F190020F91E /* Meme.swift */; };
+		CEFBAB9525A32694001F2826 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFBAB9425A32694001F2826 /* Helper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		CE1B284F25A0019800572FED /* TopTextFieldDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopTextFieldDelegate.swift; sourceTree = "<group>"; };
 		CE1B285225A001F600572FED /* BottomTextFieldDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomTextFieldDelegate.swift; sourceTree = "<group>"; };
 		CE45330D25A23F190020F91E /* Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
+		CEFBAB9425A32694001F2826 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 			children = (
 				CE1B2838259FE94600572FED /* AppDelegate.swift */,
 				CE1B283A259FE94600572FED /* SceneDelegate.swift */,
+				CEFBAB9425A32694001F2826 /* Helper.swift */,
 				CE1B284E25A0015800572FED /* TextField Delegates */,
 				CE1B283C259FE94600572FED /* MemeViewController.swift */,
 				CE45330D25A23F190020F91E /* Meme.swift */,
@@ -155,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE1B285025A0019800572FED /* TopTextFieldDelegate.swift in Sources */,
+				CEFBAB9525A32694001F2826 /* Helper.swift in Sources */,
 				CE1B283D259FE94600572FED /* MemeViewController.swift in Sources */,
 				CE1B2839259FE94600572FED /* AppDelegate.swift in Sources */,
 				CE45330E25A23F190020F91E /* Meme.swift in Sources */,

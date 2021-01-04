@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, Helper{
     
     // MARK: IBOutlets
 
@@ -22,6 +22,7 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     @IBOutlet weak var topToolBar: UIToolbar!
     
     // MARK: TextField Delegates
+    
     let topTextFieldDelegate = TopTextFieldDelegate()
     let bottomTextFieldDelegate = BottomTextFieldDelegate()
     
@@ -31,58 +32,87 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     static var activeTextField: UITextField!
     
     // MARK: Properties
+    
     var isKeyboardShown = false // implemented due to notification bug in IOS simulator
-    let memeTextAttributes: [NSAttributedString.Key: Any] = [
-       .foregroundColor: UIColor.black,
-       .strokeColor: UIColor.white,
-       .font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-        .strokeWidth: 4.0
-    ]
     
     
-    
-   
     override func viewDidLoad() {
         super.viewDidLoad()
       
-        // disable camera button if camera is not supported on device
         cameraBarButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         
         // disable share button because image is nil
         shareBarButton.isEnabled = false
         
-        // set all attributes of text in both top and bottom textfield
-        bottomTextField.delegate = bottomTextFieldDelegate
-        bottomTextField.text = MemeViewController.bottomPlaceholderText
-        bottomTextField.defaultTextAttributes = memeTextAttributes
-        
-        bottomTextField.textAlignment = .center
-        
         topTextField.delegate = topTextFieldDelegate
-        topTextField.text = MemeViewController.topPlaceholderText
-        topTextField.defaultTextAttributes = memeTextAttributes
-        topTextField.textAlignment = .center
+        bottomTextField.delegate = bottomTextFieldDelegate
         
-        // subscribe to keyboard notification
-        subscribeToKeyboardNotifications()
+        configureTextField(topTextField, withText: MemeViewController.topPlaceholderText)
+        
+        configureTextField(bottomTextField, withText: MemeViewController.bottomPlaceholderText)
+        
+        subscribeToKeyboardNotifications(showKeyboardSelector: #selector(keyboardWillShow(_:)), hideKeyboardSelector: #selector(keyboardWillHide))
         
     }
     
+    
     deinit {
-        // unsubscribe from keybaord notification
        unSubscribeFromKeyboardNotifications()
     }
     
-    func subscribeToKeyboardNotifications(){
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        if let image = info[.originalImage] as? UIImage{
+            imageView.image = image
+            // enabled the share button
+            shareBarButton.isEnabled = true;
+        }
+        
+        dismiss(animated: true, completion: nil)
     }
     
-    func unSubscribeFromKeyboardNotifications(){
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    // MARK: IBActions
+
+    @IBAction func pickImageFromAlbum(_ sender: Any) {
+        presentImagePickerWith(sourceType: .photoLibrary)
     }
+    
+    @IBAction func pickImageUsingCamera(_ sender: Any) {
+        presentImagePickerWith(sourceType: .camera)
+    }
+    
+    @IBAction func shareImage(_ sender: Any) {
+        let memedImage = generateMemedImage()
+        
+        let controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+        
+        controller.completionWithItemsHandler = {(activityType: UIActivity.ActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?) in
+            
+            if completed && error == nil {
+                // save the meme object
+                self.save(memedImage)
+            }
+        }
+        
+        self.present(controller, animated: true, completion: nil)
+        
+        // for ipad
+        if let popOver = controller.popoverPresentationController {
+          popOver.sourceView = self.view
+        }
+    }
+    
+    @IBAction func cancel(_ sender: Any) {
+        imageView.image = nil
+        topTextField.text = MemeViewController.topPlaceholderText
+        bottomTextField.text = MemeViewController.bottomPlaceholderText
+        shareBarButton.isEnabled = false
+    }
+}
+
+
+// MARK: Extension on MemeViewController
+extension MemeViewController{
     
     @objc func keyboardWillHide(){
         isKeyboardShown = false
@@ -109,31 +139,27 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         }
     }
     
-    // returns the height of the keyboard
-    func getKeyboardHeight(_ notification:Notification) -> CGFloat {
-
-        let userInfo = notification.userInfo
-        let keyboardSize = userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue // of CGRect
-        return keyboardSize.cgRectValue.height
+    func hideTopAndBottomBars(hide: Bool) {
+        topToolBar.isHidden = hide
+        bottomToolBar.isHidden = hide
     }
     
-    // Tells the delegate what the user picked.
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    func presentImagePickerWith(sourceType: UIImagePickerController.SourceType) {
+        let controller = UIImagePickerController()
         
-        if let image = info[.originalImage] as? UIImage{
-            imageView.image = image
-            // enabled the share button
-            shareBarButton.isEnabled = true;
-        }
+        controller.delegate = self
+        controller.sourceType = sourceType
         
-        dismiss(animated: true, completion: nil)
+        present(controller, animated: true, completion: nil)
     }
     
-    
-    // generate the MemeMe image to be shared
+    /**
+     Create a memed image
+     
+     - Returns: A new UIImage from original image and top and bottom texts
+    */
     func generateMemedImage() -> UIImage {
-        topToolBar.isHidden = true
-        bottomToolBar.isHidden = true
+        hideTopAndBottomBars(hide:true)
         
         // Render view to an image
         UIGraphicsBeginImageContext(self.view.frame.size)
@@ -141,74 +167,20 @@ class MemeViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
         
-        topToolBar.isHidden = false
-        bottomToolBar.isHidden = false
+        hideTopAndBottomBars(hide:false)
 
         return memedImage
     }
     
-    // save meme after sharing memed image
+    /**
+     Save a meme
+     
+     - Parameter memedImage: image generated after combining original image and texts
+    */
     func save(_ memedImage: UIImage) {
         // Create the meme
         let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imageView.image!, memedImage: memedImage)
         print(meme.bottomText)
-    }
-    
-    
-    // MARK: IBActions
-
-    @IBAction func pickImageFromAlbum(_ sender: Any) {
-        let controller = UIImagePickerController()
-        
-        controller.delegate = self
-        controller.sourceType = .photoLibrary
-        
-        present(controller, animated: true, completion: nil)
-    }
-    
-    @IBAction func pickImageUsingCamera(_ sender: Any) {
-        let controller = UIImagePickerController()
-        
-        controller.delegate = self
-        controller.sourceType = .camera
-        
-        present(controller, animated: true, completion: nil)
-    }
-    
-    @IBAction func shareImage(_ sender: Any) {
-
-        let memedImage = generateMemedImage()
-        
-        let controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
-        
-        
-        controller.completionWithItemsHandler = {(activityType: UIActivity.ActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?) in
-            
-            if completed && error == nil {
-                // save the meme object
-                self.save(memedImage)
-            }
-        }
-        
-        self.present(controller, animated: true, completion: nil)
-        
-        // for ipad
-        if let popOver = controller.popoverPresentationController {
-          popOver.sourceView = self.view
-        }
-       
-        
-        
-        
-        
-    }
-    
-    // return app to launch state
-    @IBAction func cancel(_ sender: Any) {
-        imageView.image = nil
-        topTextField.text = MemeViewController.topPlaceholderText
-        bottomTextField.text = MemeViewController.bottomPlaceholderText
-        shareBarButton.isEnabled = false
     }
 }
 

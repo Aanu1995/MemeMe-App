@@ -25,7 +25,7 @@
                                     <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="Zzh-K9-a7l">
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                                         <items>
-                                            <barButtonItem systemItem="reply" id="eeq-7f-OE7" userLabel="Share Bar Button">
+                                            <barButtonItem systemItem="action" id="eeq-7f-OE7" userLabel="Share Bar Button">
                                                 <connections>
                                                     <action selector="shareImage:" destination="BYZ-38-t0r" id="YKc-69-mGb"/>
                                                 </connections>
